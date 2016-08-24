@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiahao.book.dao.BookMapper">
+
+    <resultMap id="bookMap" type="Book">
+        <id column="book_id" property="bookId"/>
+        <result column="book_code" property="bookCode"/>
+        <result column="book_name" property="bookName"/>
+        <result column="book_type" property="bookType"/>
+        <result column="book_author" property="bookAuthor"/>
+        <result column="publish_press" property="publishPress"/>
+        <result column="publish_date" property="publishDate"/>
+        <result column="is_borrow" property="isBorrow"/>
+        <result column="createBy" property="createBy"/>
+        <result column="creation_time" property="creationTime"/>
+        <result column="last_updatetime" property="lastUpdatetime"/>
+        <association property="type" javaType="BookType">
+            <id column="id" property="id"/>
+            <result column="type_name" property="typeName"/>
+        </association>
+    </resultMap>
+
+
+    <select id="selectBookList" resultMap="bookMap">
+        select * from book_info b1, book_type b2
+        <trim prefix="where" prefixOverrides="and">
+            b1.book_type=b2.id
+            <if test="bookType!=null">
+                and book_type=#{bookType}
+            </if>
+            <if test="bookName!=null">
+                and book_name like concat('%', #{bookName}, '%')
+            </if>
+            <if test="isBorrow!=null">
+                and is_borrow=#{isBorrow}
+            </if>
+        </trim>
+        order by b1.creation_time desc limit #{startPos}, #{pageSize}
+    </select>
+
+    <update id="updateBookBorrow">
+        update book_info set is_borrow=1 where book_id=#{bookId};
+    </update>
+
+    <select id="getBookCount" resultType="int">
+        select count(1) from book_info
+        <trim prefix="where" prefixOverrides="and">
+            <if test="bookType!=null">
+                and book_type=#{bookType}
+            </if>
+            <if test="bookName!=null">
+                and book_name like concat('%', #{bookName}, '%')
+            </if>
+            <if test="isBorrow!=null">
+                and is_borrow=#{isBorrow}
+            </if>
+        </trim>
+    </select>
+
+</mapper>
